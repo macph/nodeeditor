@@ -48,6 +48,11 @@ public:
   graphModel();
 
 public:
+  /// Get the current draft connection, or null if none is active.
+  ConnectionGraphicsObject * draftConnection() const
+  {
+    return _draftConnection.get();
+  }
 
   /// Creates a "draft" instance of ConnectionGraphicsObject.
   /**
@@ -60,7 +65,11 @@ public:
   std::unique_ptr<ConnectionGraphicsObject> const &
   makeDraftConnection(ConnectionId const newConnectionId);
 
-  /// Deletes "draft" connection.
+  /// Deletes "draft" connection with onDraftConnectionDropped called.
+  void
+  dropDraftConnection();
+
+  /// Deletes "draft" connection without doing anything.
   /**
    * The function is called when user releases the mouse button during
    * the construction of the new connection without attaching it to any
@@ -90,6 +99,10 @@ public:
   connectionGraphicsObject(ConnectionId connectionId);
 
 public:
+
+  /// Called when a draft connection is released without connecting to a node.
+  virtual void
+  handleDroppedDraftConnection(QPointF const scenePos);
 
   /// Can @return an instance of the scene context menu in subclass.
   /**

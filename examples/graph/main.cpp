@@ -8,6 +8,7 @@
 #include <QScreen>
 
 #include "CustomGraphModel.hpp"
+#include "CustomGraphicsScene.hpp"
 
 
 using QtNodes::ConnectionStyle;
@@ -34,7 +35,7 @@ main(int argc, char *argv[])
     graphModel.addConnection(ConnectionId{id1, 0, id2, 0});
   }
 
-  auto scene = new BasicGraphicsScene(graphModel);
+  auto scene = new CustomGraphicsScene(graphModel);
 
   GraphicsView view(scene);
 

@@ -313,20 +313,22 @@ mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
                           *nodeScene(),
                           view->transform());
 
-  bool wasConnected = false;
-
   if (ngo)
   {
     NodeConnectionInteraction interaction(*ngo, *this, *nodeScene());
+    
+    auto wasConnected = interaction.tryConnect();
 
-    wasConnected = interaction.tryConnect();
+    // Reset connection without handling if connection attempt was unsuccessful.
+    if (!wasConnected)
+    {
+      nodeScene()->resetDraftConnection();
+    }
   }
-
-  // If connection attempt was unsuccessful
-  if (!wasConnected)
+  else
   {
-    // Resulting unique_ptr is not used and automatically deleted.
-    nodeScene()->resetDraftConnection();
+    // Handle connection if dropped outside a node.
+    nodeScene()->dropDraftConnection();
   }
 }
 
