@@ -37,15 +37,7 @@ canConnect(PortIndex * portIndex) const
     return false;
   }
 
-  NodeId connectedNodeId =
-    getNodeId(oppositePort(requiredPort), _cgo.connectionId());
-
-  // 2. Forbid connecting the node to itself.
-
-  if (_ngo.nodeId() == connectedNodeId)
-    return false;
-
-  // 3. Connection loose end is above the node port.
+  // 2. Connection loose end is above the node port.
 
   QPointF connectionPoint =
     _cgo.sceneTransform().map(_cgo.endPoint(requiredPort));
@@ -58,7 +50,7 @@ canConnect(PortIndex * portIndex) const
     return false;
   }
 
-  // 4. Model allows connection.
+  // 3. Model allows connection.
 
   AbstractGraphModel & model = _ngo.nodeScene()->graphModel();
 

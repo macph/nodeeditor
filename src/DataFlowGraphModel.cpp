@@ -144,7 +144,9 @@ connectionPossible(ConnectionId const connectionId) const
       return connected.empty() || (policy == ConnectionPolicy::Many);
     };
 
-  return getDataType(PortType::Out).id == getDataType(PortType::In).id &&
+  // Forbid connecting the node to itself.
+  return getNodeId(PortType::Out, connectionId) != getNodeId(PortType::In, connectionId) &&
+         getDataType(PortType::Out).id == getDataType(PortType::In).id &&
          portVacant(PortType::Out) && portVacant(PortType::In);
 }
 
