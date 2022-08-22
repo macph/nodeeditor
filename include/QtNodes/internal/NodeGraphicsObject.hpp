@@ -49,6 +49,9 @@ public:
   NodeState const &
   nodeState() const { return _nodeState; }
 
+  QGraphicsProxyWidget *
+  proxyWidget() const { return _proxyWidget; }
+
   QRectF
   boundingRect() const override;
 

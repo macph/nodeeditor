@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include <QtCore/QMargins>
+#include <QtWidgets/QGraphicsProxyWidget>
 
 #include "AbstractGraphModel.hpp"
 #include "ConnectionGraphicsObject.hpp"
@@ -23,6 +24,11 @@ paint(QPainter * painter,
 {
   NodeGeometry geometry(ngo);
   geometry.recalculateSizeIfFontChanged(painter->font());
+
+  // Readjust widget proxy position.
+  if (auto p = ngo.proxyWidget()) {
+    p->setPos(geometry.widgetPosition());
+  }
 
   drawNodeRect(painter, ngo);
 
