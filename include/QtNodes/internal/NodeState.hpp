@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include <QtCore/QPointer>
 #include <QtCore/QPointF>
 #include <QtCore/QUuid>
 
@@ -57,6 +58,7 @@ private:
 
   bool _resizing;
 
-  ConnectionGraphicsObject const * _connectionForReaction;
+  // Use QPointer as a guard as the connection could be deleted at any time.
+  QPointer<ConnectionGraphicsObject const> _connectionForReaction;
 };
 }
