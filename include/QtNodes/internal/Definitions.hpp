@@ -52,11 +52,12 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(NodeFlags)
  */
 enum class PortRole
 {
-  Data                 = 0, ///< `std::shared_ptr<NodeData>`.
-  DataType             = 1, ///< `QString` describing the port data type.
-  ConnectionPolicyRole = 2, ///< `enum` ConnectionPolicyRole
-  CaptionVisible       = 3, ///< `bool` for caption visibility.
-  Caption              = 4, ///< `QString` for port caption.
+  Data                    = 0, ///< `std::shared_ptr<NodeData>`.
+  DataType                = 1, ///< `QString` describing the port data type.
+  ConnectionPolicyRole    = 2, ///< `enum` ConnectionPolicyRole
+  CaptionVisible          = 3, ///< `bool` for caption visibility.
+  Caption                 = 4, ///< `QString` for port caption.
+  DisconnectionPolicyRole = 5, ///< `enum` disconnection policy for port.
 };
 Q_ENUM_NS(PortRole)
 
@@ -71,6 +72,20 @@ enum class ConnectionPolicy
   Many, ///< Any number of connections possible for the port.
 };
 Q_ENUM_NS(ConnectionPolicy)
+
+
+/**
+ * Defines how existing connections are handled when they are dragged from
+ * their ports. The values are fetched using PortRole::DisconnectionPolicy.
+ */
+enum class DisconnectionPolicy
+{
+  Default, ///< Default action with connections moved from inputs and created from outputs.
+  Create, ///< Create a draft connection. If ConnectionPolicy is set as One any existing connections are deleted.
+  Move, ///< Move an existing connection as a draft connection.
+  None, /// Do not allow disconnections by dragging.
+};
+Q_ENUM_NS(DisconnectionPolicy)
 
 
 /**

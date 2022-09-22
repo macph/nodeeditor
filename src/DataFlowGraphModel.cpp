@@ -357,6 +357,11 @@ portData(NodeId    nodeId,
       result = model->portCaption(portType, portIndex);
 
       break;
+
+    case PortRole::DisconnectionPolicyRole:
+      result = QVariant::fromValue(DisconnectionPolicy::Default);
+
+      break;
   }
 
   return result;

@@ -107,6 +107,9 @@ private:
   void
   embedQWidget();
 
+  std::pair<PortType, PortIndex>
+  findPortAt(QPointF scenePos) const;
+
 private:
 
   NodeId _nodeId;

@@ -118,6 +118,28 @@ embedQWidget()
 }
 
 
+std::pair<PortType, PortIndex>
+NodeGraphicsObject::
+findPortAt(QPointF scenePos) const
+{
+  NodeGeometry geometry(*this);
+
+  for (PortType portToCheck: {PortType::In, PortType::Out})
+  {
+    auto portIndex = geometry.checkHitScenePoint(portToCheck,
+                                                 scenePos,
+                                                 sceneTransform());
+
+    if (portIndex != InvalidPortIndex)
+    {
+      return std::pair<PortType, PortIndex>{portToCheck, portIndex};
+    }
+  }
+
+  return std::pair<PortType, PortIndex>{PortType::None, InvalidPortIndex};
+}
+
+
 #if 0
 void
 NodeGraphicsObject::
@@ -231,6 +253,29 @@ itemChange(GraphicsItemChange change, const QVariant& value)
 }
 
 
+static DisconnectionPolicy
+determinePolicy(DisconnectionPolicy policy, PortType portType)
+{
+  if (policy == DisconnectionPolicy::Create ||
+    policy == DisconnectionPolicy::Move ||
+    policy == DisconnectionPolicy::None)
+  {
+    // Adopt explicitly defined policy.
+    return policy;
+  }
+  else if (portType == PortType::In)
+  {
+    // Move connection from input port by default.
+    return DisconnectionPolicy::Move;
+  }
+  else
+  {
+    // Create connection from output port by default.
+    return DisconnectionPolicy::Create;
+  }
+}
+
+
 void
 NodeGraphicsObject::
 mousePressEvent(QGraphicsSceneMouseEvent* event)
@@ -245,69 +290,105 @@ mousePressEvent(QGraphicsSceneMouseEvent* event)
     scene()->clearSelection();
   }
 
-  for (PortType portToCheck: {PortType::In, PortType::Out})
+  // Check if a port was hit and handle connections/disconnections.
+  auto pair = findPortAt(event->scenePos());
+  auto const portType = pair.first;
+  auto const portIndex = pair.second;
+
+  if (portType == PortType::In || portType == PortType::Out)
   {
-    NodeGeometry nodeGeometry(*this);
-
-    PortIndex const portIndex =
-      nodeGeometry.checkHitScenePoint(portToCheck,
-                                      event->scenePos(),
-                                      sceneTransform());
-
-    if (portIndex != InvalidPortIndex)
-    {
-      auto const& connectedNodes =
-        _graphModel.connectedNodes(_nodeId, portToCheck, portIndex);
-
-      // Start dragging existing connection.
-      if (!connectedNodes.empty() && portToCheck == PortType::In)
+    auto createId =
+      [&](NodeId otherId, PortIndex otherIndex)
       {
-        auto const& cn = *connectedNodes.begin();
-
-        // Need "reversed" connectin id if enabled for both port types.
-        ConnectionId connectionId{cn.first, cn.second, _nodeId, portIndex};
-
-        // Need ConnectionGraphicsObject
-
-        NodeConnectionInteraction
-          interaction(*this,
-                      *nodeScene()->connectionGraphicsObject(connectionId),
-                      *nodeScene());
-
-        interaction.disconnect(portToCheck);
-      }
-      else // initialize new Connection
-      {
-        if (portToCheck == PortType::Out)
+        if (portType == PortType::In)
         {
-          auto const outPolicy =
-            _graphModel.portData(_nodeId,
-                                 portToCheck,
-                                 portIndex,
-                                 PortRole::ConnectionPolicyRole).value<ConnectionPolicy>();
-
-          if (!connectedNodes.empty() &&
-              outPolicy == ConnectionPolicy::One)
+          return ConnectionId
           {
-            for (auto& cn : connectedNodes)
-            {
-              ConnectionId connectionId{_nodeId, portIndex, cn.first, cn.second};
+            otherId,
+            otherIndex,
+            _nodeId,
+            portIndex,
+          };
+        }
+        else
+        {
+          return ConnectionId
+          {
+            _nodeId,
+            portIndex,
+            otherId,
+            otherIndex,
+          };
+        }
+      };
 
-              _graphModel.deleteConnection(connectionId);
-            }
-          }
-        } // if port == out
+    // Get connections policies for this port to determine what happens.
+    auto const connectionPolicy =
+      _graphModel.portData(_nodeId,
+                           portType,
+                           portIndex,
+                           PortRole::ConnectionPolicyRole)
+        .value<ConnectionPolicy>();
 
-        ConnectionId const incompleteConnectionId =
-          makeIncompleteConnectionId(portToCheck, _nodeId, portIndex);
+    auto const disconnectionPolicy =
+      _graphModel.portData(_nodeId,
+                           portType,
+                           portIndex,
+                           PortRole::DisconnectionPolicyRole)
+        .value<DisconnectionPolicy>();
 
-        nodeScene()->makeDraftConnection(incompleteConnectionId);
+    auto const& connectedNodes =
+      _graphModel.connectedNodes(_nodeId, portType, portIndex);
+
+    auto policy = determinePolicy(disconnectionPolicy, portType);
+
+    if (connectedNodes.empty() || policy == DisconnectionPolicy::Create)
+    {
+      // Create and start dragging draft connection.
+      // Delete all existing connections if ConnectionPolicy is not set as Many.
+      if (connectionPolicy != ConnectionPolicy::Many)
+      {
+        for (auto& cn : connectedNodes)
+        {
+          _graphModel.deleteConnection(createId(cn.first, cn.second));
+        }
       }
-    }
-  }
 
-  if (_graphModel.nodeFlags(_nodeId) & NodeFlag::Resizable)
+      ConnectionId const incompleteConnectionId =
+        makeIncompleteConnectionId(portType, _nodeId, portIndex);
+
+      nodeScene()->makeDraftConnection(incompleteConnectionId);
+    }
+    else if (policy == DisconnectionPolicy::Move)
+    {
+      // Move an existing connection.
+      auto const f = *connectedNodes.begin();
+      auto const connectionId = createId(f.first, f.second);
+
+      // Delete all but one connection if ConnectionPolicy is not set as Many.
+      if (connectionPolicy != ConnectionPolicy::Many)
+      {
+        for (auto& cn : connectedNodes)
+        {
+          if (cn != f)
+          {
+            _graphModel.deleteConnection(createId(cn.first, cn.second));
+          }
+        }
+      }
+
+      NodeConnectionInteraction
+        interaction(*this,
+                    *nodeScene()->connectionGraphicsObject(connectionId),
+                    *nodeScene());
+
+      interaction.disconnect(portType);
+    }
+    // Do nothing if disconnection policy is set as None.
+  }
+  else if (_graphModel.nodeFlags(_nodeId) & NodeFlag::Resizable)
   {
+    // Check if the resize handle was hit.
     NodeGeometry geometry(*this);
 
     auto pos = event->pos();
