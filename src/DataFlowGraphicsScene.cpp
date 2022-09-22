@@ -375,19 +375,6 @@ onPortDataSet(NodeId const    nodeId,
   Q_UNUSED(portType);
   Q_UNUSED(portIndex);
 
-  auto node = nodeGraphicsObject(nodeId);
-
-  if (node)
-  {
-    node->setGeometryChanged();
-
-    NodeGeometry geometry(*node);
-    geometry.recalculateSize();
-
-    node->update();
-    node->moveConnections();
-  }
+  updateNodeGeometry(nodeId);
 }
-
-
 }

@@ -112,6 +112,11 @@ public:
   QMenu *
   createSceneMenu(QPointF const scenePos);
 
+protected:
+  /// Update geometry and redraw node.
+  void
+  updateNodeGeometry(NodeId const nodeId);
+
 Q_SIGNALS:
 
   void
@@ -177,6 +182,9 @@ private Q_SLOTS:
 
   void
   onNodePositionUpdated(NodeId const nodeId);
+
+  void
+  onNodeDataChanged(NodeId const nodeId);
 
   void
   onPortsAboutToBeDeleted(NodeId const nodeId,

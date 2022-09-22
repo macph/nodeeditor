@@ -180,6 +180,9 @@ Q_SIGNALS:
   nodePositionUpdated(NodeId const nodeId);
 
   void
+  nodeDataChanged(NodeId const nodeId);
+
+  void
   portDataSet(NodeId const    nodeId,
               PortType const  portType,
               PortIndex const portIndex);

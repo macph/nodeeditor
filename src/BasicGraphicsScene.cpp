@@ -23,6 +23,7 @@
 #include "ConnectionGraphicsObject.hpp"
 #include "ConnectionIdUtils.hpp"
 #include "GraphicsView.hpp"
+#include "NodeGeometry.hpp"
 #include "NodeGraphicsObject.hpp"
 
 
@@ -52,6 +53,9 @@ BasicGraphicsScene(AbstractGraphModel &graphModel,
 
   connect(&_graphModel, &AbstractGraphModel::nodePositionUpdated,
           this, &BasicGraphicsScene::onNodePositionUpdated);
+
+  connect(&_graphModel, &AbstractGraphModel::nodeDataChanged,
+          this, &BasicGraphicsScene::onNodeDataChanged);
 
   connect(&_graphModel, &AbstractGraphModel::portsAboutToBeDeleted,
           this, &BasicGraphicsScene::onPortsAboutToBeDeleted);
@@ -187,6 +191,24 @@ createSceneMenu(QPointF const scenePos)
 {
   Q_UNUSED(scenePos);
   return nullptr;
+}
+
+
+void
+BasicGraphicsScene::
+updateNodeGeometry(NodeId const nodeId)
+{
+  auto node = nodeGraphicsObject(nodeId);
+  if (node)
+  {
+    node->setGeometryChanged();
+
+    NodeGeometry geometry(*node);
+    geometry.recalculateSize();
+
+    node->update();
+    node->moveConnections();
+  }
 }
 
 
@@ -328,6 +350,14 @@ onNodePositionUpdated(NodeId const nodeId)
                                       NodeRole::Position).value<QPointF>());
     node->update();
   }
+}
+
+
+void
+BasicGraphicsScene::
+onNodeDataChanged(NodeId const nodeId)
+{
+  updateNodeGeometry(nodeId);
 }
 
 
