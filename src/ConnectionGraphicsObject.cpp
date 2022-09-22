@@ -129,7 +129,7 @@ boundingRect() const
   QRectF commonRect = basicRect.united(c1c2Rect);
 
   auto const &connectionStyle = StyleCollection::connectionStyle();
-  float const diam = connectionStyle.pointDiameter();
+  float const diam = connectionStyle.PointDiameter;
   QPointF const cornerOffset(diam, diam);
 
   // Expand rect by port circle diameter

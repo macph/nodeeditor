@@ -176,7 +176,7 @@ drawConnectionPoints(QPainter * painter,
         }
       }
 
-      if (connectionStyle.useDataDefinedColors())
+      if (connectionStyle.UseDataDefinedColors)
       {
         painter->setBrush(connectionStyle.normalColor(dataType.id));
       }
@@ -237,7 +237,7 @@ drawFilledConnectionPoints(QPainter * painter,
                          PortRole::DataType).value<NodeDataType>();
 
         auto const &connectionStyle = StyleCollection::connectionStyle();
-        if (connectionStyle.useDataDefinedColors())
+        if (connectionStyle.UseDataDefinedColors)
         {
           QColor const c = connectionStyle.normalColor(dataType.id);
           painter->setPen(c);

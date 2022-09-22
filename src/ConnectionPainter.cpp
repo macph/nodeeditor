@@ -103,8 +103,8 @@ drawSketchLine(QPainter * painter,
       QtNodes::StyleCollection::connectionStyle();
 
     QPen pen;
-    pen.setWidth(connectionStyle.constructionLineWidth());
-    pen.setColor(connectionStyle.constructionColor());
+    pen.setWidth(connectionStyle.ConstructionLineWidth);
+    pen.setColor(connectionStyle.ConstructionColor);
     pen.setStyle(Qt::DashLine);
 
     painter->setPen(pen);
@@ -132,13 +132,13 @@ drawHoveredOrSelected(QPainter * painter,
     auto const &connectionStyle =
       QtNodes::StyleCollection::connectionStyle();
 
-    double const lineWidth = connectionStyle.lineWidth();
+    double const lineWidth = connectionStyle.LineWidth;
 
     QPen pen;
     pen.setWidth(2 * lineWidth);
     pen.setColor(selected ?
-                 connectionStyle.selectedHaloColor() :
-                 connectionStyle.hoveredColor());
+                 connectionStyle.SelectedHaloColor :
+                 connectionStyle.HoveredColor);
 
     painter->setPen(pen);
     painter->setBrush(Qt::NoBrush);
@@ -165,15 +165,15 @@ drawNormalLine(QPainter * painter,
   auto const &connectionStyle =
     QtNodes::StyleCollection::connectionStyle();
 
-  QColor normalColorOut = connectionStyle.normalColor();
-  QColor normalColorIn  = connectionStyle.normalColor();
-  QColor selectedColor  = connectionStyle.selectedColor();
+  QColor normalColorOut = connectionStyle.NormalColor;
+  QColor normalColorIn  = connectionStyle.NormalColor;
+  QColor selectedColor  = connectionStyle.SelectedColor;
 
   bool useGradientColor = false;
 
   AbstractGraphModel const &graphModel = cgo.graphModel();
 
-  if (connectionStyle.useDataDefinedColors())
+  if (connectionStyle.UseDataDefinedColors)
   {
     using QtNodes::PortType;
 
@@ -200,7 +200,7 @@ drawNormalLine(QPainter * painter,
 
   // geometry
 
-  double const lineWidth = connectionStyle.lineWidth();
+  double const lineWidth = connectionStyle.LineWidth;
 
   // draw normal line
   QPen p;
@@ -286,10 +286,10 @@ paint(QPainter * painter,
   auto const &connectionStyle =
     QtNodes::StyleCollection::connectionStyle();
 
-  double const pointDiameter = connectionStyle.pointDiameter();
+  double const pointDiameter = connectionStyle.PointDiameter;
 
-  painter->setPen(connectionStyle.constructionColor());
-  painter->setBrush(connectionStyle.constructionColor());
+  painter->setPen(connectionStyle.ConstructionColor);
+  painter->setBrush(connectionStyle.ConstructionColor);
   double const pointRadius = pointDiameter / 2.0;
   painter->drawEllipse(cgo.out(), pointRadius, pointRadius);
   painter->drawEllipse(cgo.in(),   pointRadius, pointRadius);
