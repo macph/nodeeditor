@@ -150,6 +150,27 @@ makeCompleteConnectionId(ConnectionId    incompleteConnectionId,
 }
 
 
+inline
+PortType
+getRequiredPort(ConnectionId const & connectionId)
+{
+  if (connectionId.outNodeId == connectionId.inNodeId)
+  {
+    return PortType::None;
+  }
+  else if (connectionId.outNodeId == InvalidNodeId)
+  {
+    return PortType::Out;
+  }
+  else if (connectionId.inNodeId == InvalidNodeId)
+  {
+    return PortType::In;
+  }
+  else
+  {
+    return PortType::None;
+  }
+}
 
 
 inline

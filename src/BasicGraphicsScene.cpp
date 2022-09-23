@@ -110,18 +110,19 @@ void
 BasicGraphicsScene::
 dropDraftConnection()
 {
-  if (!_draftConnection) {
+  if (!_draftConnection)
+  {
     return;
   }
 
-  auto port = _draftConnection->connectionState().requiredPort();
+  auto draftConnectionId = _draftConnection->connectionId();
+
+  auto port = getRequiredPort(draftConnectionId);
   Q_ASSERT(port == PortType::In || port == PortType::Out);
 
   auto scenePos = _draftConnection->sceneTransform().map(_draftConnection->endPoint(port));
 
-  handleDroppedDraftConnection(scenePos);
-
-  _draftConnection.reset();
+  handleDroppedDraftConnection(scenePos, draftConnectionId);
 }
 
 
@@ -179,9 +180,13 @@ connectionGraphicsObject(ConnectionId connectionId)
 
 void
 BasicGraphicsScene::
-handleDroppedDraftConnection(QPointF const scenePos)
+handleDroppedDraftConnection(QPointF const & scenePos,
+                             ConnectionId const & draftConnectionId)
 {
   Q_UNUSED(scenePos);
+  Q_UNUSED(draftConnectionId);
+
+  resetDraftConnection();
 }
 
 

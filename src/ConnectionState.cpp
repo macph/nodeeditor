@@ -4,6 +4,7 @@
 #include <QtCore/QPointF>
 
 #include "BasicGraphicsScene.hpp"
+#include "ConnectionIdUtils.hpp"
 #include "ConnectionGraphicsObject.hpp"
 #include "NodeGraphicsObject.hpp"
 
@@ -21,18 +22,7 @@ PortType
 ConnectionState::
 requiredPort() const
 {
-  PortType t = PortType::None;
-
-  if (_cgo.connectionId().outNodeId == InvalidNodeId)
-  {
-    t = PortType::Out;
-  }
-  else if (_cgo.connectionId().inNodeId == InvalidNodeId)
-  {
-    t = PortType::In;
-  }
-
-  return t;
+  return getRequiredPort(_cgo.connectionId());
 }
 
 

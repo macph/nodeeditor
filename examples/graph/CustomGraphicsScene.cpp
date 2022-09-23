@@ -1,35 +1,48 @@
 #include "CustomGraphicsScene.hpp"
 
-#include <QtGui/QCursor>
+#include <QtGui/QAction>
+#include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QMenu>
-#include <QtNodes/internal/ConnectionGraphicsObject.hpp>
 #include <QtNodes/ConnectionIdUtils>
 
-CustomGraphicsScene::CustomGraphicsScene(QtNodes::AbstractGraphModel &graphModel,
-                                         QObject *parent)
+CustomGraphicsScene::
+CustomGraphicsScene(QtNodes::AbstractGraphModel &graphModel, QObject *parent)
   : QtNodes::BasicGraphicsScene(graphModel, parent)
 {}
 
-void CustomGraphicsScene::handleDroppedDraftConnection(QPointF scenePos)
+void
+CustomGraphicsScene::
+handleDroppedDraftConnection(QPointF const & scenePos,
+                             QtNodes::ConnectionId const & draftConnectionId)
 {
-  auto menu = QMenu();
-  auto action = menu.addAction("Add node here");
-  auto result = menu.exec(QCursor::pos());
+  auto v = views();
 
-  if (result != action) {
+  if (v.isEmpty()) {
+    resetDraftConnection();
     return;
   }
 
-  auto draft = draftConnection();
+  auto view = v.first();
 
-  if (!draft) {
-    return;
-  }
+  auto menu = new QMenu(view);
+  menu->setAttribute(Qt::WidgetAttribute::WA_DeleteOnClose);
 
-  auto nodeId = graphModel().addNode(QString());
-  graphModel().setNodeData(nodeId, QtNodes::NodeRole::Position, scenePos);
+  connect(menu, &QMenu::destroyed, [&]() { resetDraftConnection(); });
 
-  auto connectionId = QtNodes::makeCompleteConnectionId(draft->connectionId(), nodeId, 0);
+  auto action = menu->addAction("Add node here");
 
-  graphModel().addConnection(connectionId);
+  connect(action, &QAction::triggered,
+          [&, scenePos, draftConnectionId]()
+          {
+            auto nodeId = graphModel().addNode(QString());
+
+            graphModel().setNodeData(nodeId, QtNodes::NodeRole::Position, scenePos);
+
+            graphModel().addConnection(
+              makeCompleteConnectionId(draftConnectionId, nodeId, 0));
+          });
+
+  auto pos = view->mapToGlobal(view->mapFromScene(scenePos));
+
+  menu->popup(pos);
 }

@@ -10,5 +10,8 @@ class CustomGraphicsScene : public QtNodes::BasicGraphicsScene
 public:
   CustomGraphicsScene(QtNodes::AbstractGraphModel &graphModel, QObject *parent = nullptr);
 
-  void handleDroppedDraftConnection(QPointF const scenePos) override;
+  void
+  handleDroppedDraftConnection(
+    QPointF const & scenePos,
+    QtNodes::ConnectionId const & draftConnectionId) override;
 };

@@ -101,8 +101,11 @@ public:
 public:
 
   /// Called when a draft connection is released without connecting to a node.
+  /// Note that this method calls resetDraftConnection() to delete the draft
+  /// connection and any reimplementation must do the same.
   virtual void
-  handleDroppedDraftConnection(QPointF const scenePos);
+  handleDroppedDraftConnection(QPointF const & scenePos,
+                               ConnectionId const & draftConnectionId);
 
   /// Can @return an instance of the scene context menu in subclass.
   /**
